@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { assets } from "../assets/admin_assets/assets";
-
-const Add = () => {
+import { backendUrl } from "../api/user";
+import axios from "axios";
+import { toast } from "react-toastify";
+const Add = ({ token }) => {
   const [image1, setImage1] = useState(null);
   const [image2, setImage2] = useState(null);
   const [image3, setImage3] = useState(null);
@@ -19,6 +21,7 @@ const Add = () => {
     e.preventDefault();
     try {
       const formData = new FormData();
+
       formData.append("name", name);
       formData.append("description", description);
       formData.append("price", price);
@@ -32,8 +35,37 @@ const Add = () => {
       image3 && formData.append("image3", image3);
       image4 && formData.append("image4", image4);
 
-      
-    } catch (error) {}
+      const response = await axios.post(
+        backendUrl + "/api/product/add",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+            token: token, // Important
+          },
+        }
+      );
+
+      if (response.data.success) {
+        toast.success(response.data.message);
+        setName("");
+        setDescription("");
+        setPrice("");
+        setCategory("Men");
+        setSubCategory("Topwear");
+        setSizes([]);
+        setBestseller(false);
+        setImage1(false);
+        setImage2(false);
+        setImage3(false);
+        setImage4(false);
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error.message);
+    }
   };
   return (
     <form
